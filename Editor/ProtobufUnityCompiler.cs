@@ -5,6 +5,7 @@ using UnityEngine;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace E7.Protobuf
 {
@@ -17,8 +18,20 @@ namespace E7.Protobuf
         {
             get
             {
-                string[] protoFiles = Directory.GetFiles(Application.dataPath, "*.proto", SearchOption.AllDirectories);
+                string[] protoFiles = Directory.GetFiles(SourceDir, "*.proto", SearchOption.AllDirectories);
                 return protoFiles;
+            }
+        }
+
+        private static string SourceDir {
+            get {
+                return Application.dataPath + "/proto";
+            }
+        }
+
+        private static string TargetDir {
+            get {
+                return Application.dataPath + "/Scripts/proto";
             }
         }
 
@@ -106,9 +119,9 @@ namespace E7.Protobuf
             //Do not compile changes coming from UPM package.
             if (protoFileSystemPath.Contains("Packages/com.e7.protobuf-unity")) return false;
 
-            if (Path.GetExtension(protoFileSystemPath) == ".proto")
-            {
-                string outputPath = Path.GetDirectoryName(protoFileSystemPath);
+            if (Path.GetExtension(protoFileSystemPath) == ".proto") {
+                string outputPath = Path.GetDirectoryName(protoFileSystemPath).Replace(SourceDir, TargetDir);
+                Directory.CreateDirectory(outputPath);
 
                 string options = " --csharp_out \"{0}\" ";
                 foreach (string s in includePaths)
